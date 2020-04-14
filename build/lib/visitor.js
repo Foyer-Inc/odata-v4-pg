@@ -64,7 +64,9 @@ class PGVisitor extends visitor_1.Visitor {
         if (this.options.useParameters) {
             let value = odata_v4_literal_1.Literal.convert(node.value, node.raw);
             context.literal = value;
-            this.parameters.push(value);
+            if (context.literal != null){
+                this.parameters.push(value);
+            }
             this.where += `\$${this.parameters.length}`;
         }
         else
