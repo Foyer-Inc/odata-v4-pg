@@ -48,10 +48,8 @@ export class PGVisitor extends Visitor{
 		this.Visit(node.value.left, context);
 		this.where += " = ";
 		this.Visit(node.value.right, context);
-		if (this.options.useParameters && context.literal == null){
-			this.where = this.where.replace(/=.*/, "IS NULL").replace(new RegExp(`\\? = "${context.identifier}"$`), `"${context.identifier}" IS NULL`);
-		}else if (context.literal == "NULL"){
-			this.where = this.where.replace(/= NULL$/, "IS NULL").replace(new RegExp(`NULL = "${context.identifier}"$`), `"${context.identifier}" IS NULL`);
+		if (context.literal == null){
+			this.where = this.where.replace(new RegExp(`"${context.identifier}" = \\$\\d+`), `"${context.identifier}" IS NULL`);
 		}
 	}
 
@@ -59,10 +57,8 @@ export class PGVisitor extends Visitor{
 		this.Visit(node.value.left, context);
 		this.where += " <> ";
 		this.Visit(node.value.right, context);
-		if (this.options.useParameters && context.literal == null){
-			this.where = this.where.replace(/<>.*/, "IS NOT NULL").replace(new RegExp(`\\? <> "${context.identifier}"$`), `"${context.identifier}" IS NOT NULL`);
-		}else if (context.literal == "NULL"){
-			this.where = this.where.replace(/<> NULL$/, "IS NOT NULL").replace(new RegExp(`NULL <> "${context.identifier}"$`), `"${context.identifier}" IS NOT NULL`);
+		if (context.literal == null){
+			this.where = this.where.replace(new RegExp(`"${context.identifier}" <> \\$\\d+`), `"${context.identifier}" IS NOT NULL`);
 		}
 	}
 
