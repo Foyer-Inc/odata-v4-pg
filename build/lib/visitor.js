@@ -134,11 +134,11 @@ class PGVisitor extends visitor_1.Visitor {
                 }
                 break;
             case "concat":
-                this.where += "(";
+                this.where += "(COALESCE(";
                 this.Visit(params[0], context);
-                this.where += " || ";
+                this.where += ", '') || COALESCE(";
                 this.Visit(params[1], context);
-                this.where += ")";
+                this.where += ", ''))";
                 break;
             case "round":
                 this.where += "ROUND(";
