@@ -75,30 +75,30 @@ class PGVisitor extends visitor_1.Visitor {
                 if (this.options.useParameters) {
                     let value = odata_v4_literal_1.Literal.convert(params[1].value, params[1].raw);
                     this.parameters.push(`%${value}%`);
-                    this.where += ` like \$${this.parameters.length}`;
+                    this.where += ` ilike \$${this.parameters.length}`;
                 }
                 else
-                    this.where += ` like '%${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}%'`;
+                    this.where += ` ilike '%${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}%'`;
                 break;
             case "endswith":
                 this.Visit(params[0], context);
                 if (this.options.useParameters) {
                     let value = odata_v4_literal_1.Literal.convert(params[1].value, params[1].raw);
                     this.parameters.push(`%${value}`);
-                    this.where += ` like \$${this.parameters.length}`;
+                    this.where += ` ilike \$${this.parameters.length}`;
                 }
                 else
-                    this.where += ` like '%${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}'`;
+                    this.where += ` ilike '%${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}'`;
                 break;
             case "startswith":
                 this.Visit(params[0], context);
                 if (this.options.useParameters) {
                     let value = odata_v4_literal_1.Literal.convert(params[1].value, params[1].raw);
                     this.parameters.push(`${value}%`);
-                    this.where += ` like \$${this.parameters.length}`;
+                    this.where += ` ilike \$${this.parameters.length}`;
                 }
                 else
-                    this.where += ` like '${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}%'`;
+                    this.where += ` ilike '${visitor_1.SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}%'`;
                 break;
             case "substring":
                 this.where += "SUBSTR(";
@@ -123,13 +123,13 @@ class PGVisitor extends visitor_1.Visitor {
                     if (this.options.useParameters) {
                         let value = odata_v4_literal_1.Literal.convert(params[0].value, params[0].raw);
                         this.parameters.push(`%${value}%`);
-                        this.where += ` like \$${this.parameters.length}`;
+                        this.where += ` ilike \$${this.parameters.length}`;
                     }
                     else
-                        this.where += ` like '%${visitor_1.SQLLiteral.convert(params[0].value, params[0].raw).slice(1, -1)}%'`;
+                        this.where += ` ilike '%${visitor_1.SQLLiteral.convert(params[0].value, params[0].raw).slice(1, -1)}%'`;
                 }
                 else {
-                    this.where += " like ";
+                    this.where += " ilike ";
                     this.Visit(params[0], context);
                 }
                 break;
