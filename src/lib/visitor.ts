@@ -82,6 +82,15 @@ export class PGVisitor extends Visitor{
 		}
 	}
 
+	protected VisitHasExpression(node:Token, context:any){
+		this.Visit(node.value.left, context);
+		this.where += " contains "
+		this.Visit(node.value.right, context);
+		if (context.literal == null){
+			this.where = this.where.replace(new RegExp(`"${context.identifier}" contains \\$\\d+`), `"${context.identifier}" IS NULL`);
+		}
+	}
+
 	protected VisitNotEqualsExpression(node:Token, context:any){
 		this.Visit(node.value.left, context);
 		this.where += " <> ";
