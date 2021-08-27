@@ -45,7 +45,7 @@ class PGVisitor extends visitor_1.Visitor {
         this.Visit(node.value, context);
     }
     VisitEnumMemberValue(node, context) {
-        this.VisitLiteral(node.value, context);
+        this.VisitLiteral(node, context);
     }
     VisitSelectItem(node, context) {
         let item = node.raw.replace(/\//g, '.');

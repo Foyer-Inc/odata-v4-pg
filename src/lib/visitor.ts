@@ -50,7 +50,7 @@ export class PGVisitor extends Visitor{
 	  }
 	
 	  protected VisitEnumMemberValue(node: Token, context: any) {
-		this.VisitLiteral(node.value, context);
+		this.VisitLiteral(node, context);
 	  }
 
 	protected VisitSelectItem(node:Token, context:any){
