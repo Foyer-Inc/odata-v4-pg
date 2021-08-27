@@ -45,7 +45,16 @@ class PGVisitor extends visitor_1.Visitor {
         this.Visit(node.value, context);
     }
     VisitEnumMemberValue(node, context) {
-        this.VisitLiteral(node, context);
+        if (this.options.useParameters) {
+            let value = node['@odata'].type[node.raw];
+            context.literal = value;
+            if (context.literal != null) {
+                this.parameters.push(value);
+            }
+            this.where += `\$${this.parameters.length}`;
+        }
+        else
+            this.where += (context.literal = visitor_1.SQLLiteral.convert(node.value, node.raw));
     }
     VisitSelectItem(node, context) {
         let item = node.raw.replace(/\//g, '.');
