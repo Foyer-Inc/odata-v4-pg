@@ -1,6 +1,8 @@
 import { Token } from "odata-v4-parser/lib/lexer";
 import { Visitor } from "odata-v4-sql/lib/visitor";
 import { SqlOptions } from "./index";
+export declare const ODATA_TYPE = "@odata.type";
+export declare const ODATA_TYPENAME = "@odata.type.name";
 export declare class PGVisitor extends Visitor {
     parameters: any[];
     includes: PGVisitor[];

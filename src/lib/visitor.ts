@@ -3,6 +3,9 @@ import { Literal } from "odata-v4-literal";
 import { SQLLiteral, SQLLang, Visitor } from "odata-v4-sql/lib/visitor";
 import { SqlOptions } from "./index";
 
+export const ODATA_TYPE = '@odata.type';
+export const ODATA_TYPENAME = '@odata.type.name';
+
 export class PGVisitor extends Visitor{
 	parameters:any[] = [];
 	includes:PGVisitor[] = [];
@@ -51,7 +54,7 @@ export class PGVisitor extends Visitor{
 	
 	  protected VisitEnumMemberValue(node: Token, context: any) {
 		if (this.options.useParameters){
-			let value = node['@odata'].type[SQLLiteral.convert(node.value, node.raw)]
+			let value = node[ODATA_TYPE][SQLLiteral.convert(node.value, node.raw)]
 			context.literal = value;
 			if (context.literal != null){
 				this.parameters.push(value);

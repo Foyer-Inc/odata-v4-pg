@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PGVisitor = void 0;
+exports.PGVisitor = exports.ODATA_TYPENAME = exports.ODATA_TYPE = void 0;
 const odata_v4_literal_1 = require("odata-v4-literal");
 const visitor_1 = require("odata-v4-sql/lib/visitor");
+exports.ODATA_TYPE = '@odata.type';
+exports.ODATA_TYPENAME = '@odata.type.name';
 class PGVisitor extends visitor_1.Visitor {
     constructor(options = {}) {
         super(options);
@@ -46,7 +48,7 @@ class PGVisitor extends visitor_1.Visitor {
     }
     VisitEnumMemberValue(node, context) {
         if (this.options.useParameters) {
-            let value = node['@odata'].type[visitor_1.SQLLiteral.convert(node.value, node.raw)];
+            let value = node[exports.ODATA_TYPE][visitor_1.SQLLiteral.convert(node.value, node.raw)];
             context.literal = value;
             if (context.literal != null) {
                 this.parameters.push(value);
