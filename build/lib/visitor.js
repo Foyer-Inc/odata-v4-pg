@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PGVisitor = void 0;
 const odata_v4_literal_1 = require("odata-v4-literal");
 const visitor_1 = require("odata-v4-sql/lib/visitor");
 class PGVisitor extends visitor_1.Visitor {
@@ -30,6 +32,21 @@ class PGVisitor extends visitor_1.Visitor {
             this.parameterSeed = visitor.parameterSeed;
         });
     }
+    VisitEnum(node, context) {
+        const enumName = node.value.name.raw.split('.');
+        context.enumName = enumName.pop();
+        context.enumNamespace = enumName.join('.');
+        this.Visit(node.value.value, context);
+    }
+    VisitEnumValue(node, context) {
+        this.Visit(node.value.values[0], context);
+    }
+    VisitEnumerationMember(node, context) {
+        this.Visit(node.value, context);
+    }
+    VisitEnumMemberValue(node, context) {
+        this.VisitLiteral(node.value, context);
+    }
     VisitSelectItem(node, context) {
         let item = node.raw.replace(/\//g, '.');
         this.select += `"${item}"`;
@@ -58,7 +75,7 @@ class PGVisitor extends visitor_1.Visitor {
         if (this.options.useParameters) {
             let value = odata_v4_literal_1.Literal.convert(node.value, node.raw);
             context.literal = value;
-            if (context.literal != null){
+            if (context.literal != null) {
                 this.parameters.push(value);
             }
             this.where += `\$${this.parameters.length}`;

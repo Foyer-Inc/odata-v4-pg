@@ -34,6 +34,25 @@ export class PGVisitor extends Visitor{
         });
     }
 
+	protected VisitEnum(node: Token, context: any) {
+		const enumName = node.value.name.raw.split('.');
+		context.enumName = enumName.pop();
+		context.enumNamespace = enumName.join('.');
+		this.Visit(node.value.value, context);
+	  }
+	
+	  protected VisitEnumValue(node: Token, context: any) {
+		this.Visit(node.value.values[0], context);
+	  }
+	
+	  protected VisitEnumerationMember(node: Token, context: any) {
+		  this.Visit(node.value, context)
+	  }
+	
+	  protected VisitEnumMemberValue(node: Token, context: any) {
+		this.VisitLiteral(node.value, context);
+	  }
+
 	protected VisitSelectItem(node:Token, context:any){
 		let item = node.raw.replace(/\//g, '.');
 		this.select += `"${item}"`;

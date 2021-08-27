@@ -7,6 +7,10 @@ export declare class PGVisitor extends Visitor {
     constructor(options?: SqlOptions);
     from(table: string): string;
     protected VisitExpand(node: Token, context: any): void;
+    protected VisitEnum(node: Token, context: any): void;
+    protected VisitEnumValue(node: Token, context: any): void;
+    protected VisitEnumerationMember(node: Token, context: any): void;
+    protected VisitEnumMemberValue(node: Token, context: any): void;
     protected VisitSelectItem(node: Token, context: any): void;
     protected VisitODataIdentifier(node: Token, context: any): void;
     protected VisitEqualsExpression(node: Token, context: any): void;

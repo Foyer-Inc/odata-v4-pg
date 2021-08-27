@@ -9,13 +9,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const pg = require("pg");
 const config = require("config");
 const index_1 = require("../lib/index");
@@ -57,13 +59,13 @@ __decorate([
 let CountriesController = class CountriesController extends odata_v4_server_1.ODataController {
     getCountries(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sqlQuery = index_1.createQuery(query);
+            let sqlQuery = (0, index_1.createQuery)(query);
             return (yield pool.connect()).query(sqlQuery.from("country"), sqlQuery.parameters).then(result => result.rows);
         });
     }
     getCountry(code, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sqlQuery = index_1.createQuery(query);
+            let sqlQuery = (0, index_1.createQuery)(query);
             return (yield pool.connect()).query(`SELECT ${sqlQuery.select} FROM country WHERE code = $${sqlQuery.parameters.length + 1} AND (${sqlQuery.where})`, sqlQuery.parameters.concat([code])).then(result => result.rows[0]);
         });
     }
@@ -83,13 +85,13 @@ CountriesController = __decorate([
 let CitiesController = class CitiesController extends odata_v4_server_1.ODataController {
     getCities(stream, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sqlQuery = index_1.createQuery(query);
+            let sqlQuery = (0, index_1.createQuery)(query);
             return (yield pool.connect()).query(sqlQuery.from("country"), sqlQuery.parameters).then(result => result.rows);
         });
     }
     getCity(id, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sqlQuery = index_1.createQuery(query);
+            let sqlQuery = (0, index_1.createQuery)(query);
             return (yield pool.connect()).query(`SELECT ${sqlQuery.select} FROM country WHERE id = $${sqlQuery.parameters.length + 1} AND (${sqlQuery.where})`, sqlQuery.parameters.concat([id])).then(result => result.rows[0]);
         });
     }
@@ -110,7 +112,7 @@ CitiesController = __decorate([
 let CountryLanguagesController = class CountryLanguagesController extends odata_v4_server_1.ODataController {
     getLanguages(stream, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sqlQuery = index_1.createQuery(query);
+            let sqlQuery = (0, index_1.createQuery)(query);
             return (yield pool.connect()).query(sqlQuery.from("countrylanguage"), sqlQuery.parameters).then(result => result.rows);
         });
     }
