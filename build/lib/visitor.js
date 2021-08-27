@@ -74,6 +74,14 @@ class PGVisitor extends visitor_1.Visitor {
             this.where = this.where.replace(new RegExp(`"${context.identifier}" = \\$\\d+`), `"${context.identifier}" IS NULL`);
         }
     }
+    VisitHasExpression(node, context) {
+        this.Visit(node.value.left, context);
+        this.where += " contains ";
+        this.Visit(node.value.right, context);
+        if (context.literal == null) {
+            this.where = this.where.replace(new RegExp(`"${context.identifier}" contains \\$\\d+`), `"${context.identifier}" IS NULL`);
+        }
+    }
     VisitNotEqualsExpression(node, context) {
         this.Visit(node.value.left, context);
         this.where += " <> ";
