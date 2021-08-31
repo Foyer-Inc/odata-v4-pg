@@ -9,6 +9,7 @@ export const ODATA_TYPENAME = '@odata.type.name';
 export class PGVisitor extends Visitor{
 	parameters:any[] = [];
 	includes:PGVisitor[] = [];
+	join: string;
 
 	constructor(options = <SqlOptions>{}){
 		super(options);
@@ -17,42 +18,54 @@ export class PGVisitor extends Visitor{
 	}
 
 	from(table:string){
-		let sql = `SELECT ${this.select} FROM ${table} WHERE ${this.where} ORDER BY ${this.orderby}`;
+		let sql = `SELECT ${this.select} FROM "${table}"`;
+
+		if (this.join) {
+			sql += ` ${this.join} `;
+			sql = sql.replace(/placeholderTable/g, table);
+		} else if (this.where) {
+			sql += ` WHERE ${this.where} `;
+		}
+
+		if (this.orderby) {
+			sql += ` ORDER BY ${this.orderby}`;
+		}
+
 		if (typeof this.limit == "number") sql += ` LIMIT ${this.limit}`;
 		if (typeof this.skip == "number") sql += ` OFFSET ${this.skip}`;
 		return sql;
 	}
 
 	protected VisitExpand(node: Token, context: any) {
-        node.value.items.forEach((item) => {
-            let expandPath = item.value.path.raw;
-            let visitor = this.includes.filter(v => v.navigationProperty == expandPath)[0];
-            if (!visitor){
-                visitor = new PGVisitor(this.options);
+		node.value.items.forEach((item) => {
+			let expandPath = item.value.path.raw;
+			let visitor = this.includes.filter(v => v.navigationProperty == expandPath)[0];
+			if (!visitor){
+				visitor = new PGVisitor(this.options);
 				visitor.parameterSeed = this.parameterSeed;
-                this.includes.push(visitor);
-            }
-            visitor.Visit(item);
+				this.includes.push(visitor);
+			}
+			visitor.Visit(item);
 			this.parameterSeed = visitor.parameterSeed;
-        });
-    }
+		});
+	}
 
 	protected VisitEnum(node: Token, context: any) {
 		const enumName = node.value.name.raw.split('.');
 		context.enumName = enumName.pop();
 		context.enumNamespace = enumName.join('.');
 		this.Visit(node.value.value, context);
-	  }
-	
-	  protected VisitEnumValue(node: Token, context: any) {
+	}
+
+	protected VisitEnumValue(node: Token, context: any) {
 		this.Visit(node.value.values[0], context);
-	  }
-	
-	  protected VisitEnumerationMember(node: Token, context: any) {
-		  this.Visit(node.value, context)
-	  }
-	
-	  protected VisitEnumMemberValue(node: Token, context: any) {
+	}
+
+	protected VisitEnumerationMember(node: Token, context: any) {
+		this.Visit(node.value, context)
+	}
+
+	protected VisitEnumMemberValue(node: Token, context: any) {
 		if (this.options.useParameters){
 			let value = node[ODATA_TYPE][SQLLiteral.convert(node.value, node.raw)]
 			context.literal = value;
@@ -84,11 +97,37 @@ export class PGVisitor extends Visitor{
 
 	protected VisitHasExpression(node:Token, context:any){
 		this.Visit(node.value.left, context);
-		this.where += " contains "
+		this.where += " @> ARRAY[";
 		this.Visit(node.value.right, context);
+		this.where += "]";
 		if (context.literal == null){
-			this.where = this.where.replace(new RegExp(`"${context.identifier}" contains \\$\\d+`), `"${context.identifier}" IS NULL`);
+			this.where = this.where.replace(new RegExp(`"${context.identifier}" @> \\$\\d+`), `"${context.identifier}" IS NULL`);
 		}
+	}
+
+	protected VisitLambdaVariableExpression(node: Token, context: any) { }
+
+	protected VisitLambdaPredicateExpression(node: Token, context: any) {
+		const enumValue = node.value?.value?.right?.value?.value?.raw;
+
+		if (enumValue) {
+			this.parameters.push(enumValue);
+			const columnName = context.identifier.replace(".", "");
+
+			this.join = `LEFT JOIN "${columnName}Map" ON "${columnName}Map"."placeholderTableKey" = "placeholderTable"."ListingKey" WHERE "${columnName}Map"."Value"=$${this.parameters.length}`;
+		}
+	}
+
+	protected VisitAnyExpression(node: Token, context: any) {
+		this.Visit(node.value.predicate, context);
+	}
+
+	protected VisitAllExpression(node: Token, context: any) {
+		this.Visit(node.value.predicate, context);
+	}
+
+	protected VisitCollectionPathExpression(node: Token, context: any) {
+		this.Visit(node.value, context);
 	}
 
 	protected VisitNotEqualsExpression(node:Token, context:any){
