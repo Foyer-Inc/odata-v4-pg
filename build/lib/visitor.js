@@ -14,7 +14,17 @@ class PGVisitor extends visitor_1.Visitor {
         this.type = visitor_1.SQLLang.PostgreSql;
     }
     from(table) {
-        let sql = `SELECT ${this.select} FROM ${table} WHERE ${this.where} ORDER BY ${this.orderby}`;
+        let sql = `SELECT ${this.select} FROM "${table}"`;
+        if (this.join) {
+            sql += ` ${this.join} `;
+            sql = sql.replace(/placeholderTable/g, table);
+        }
+        else if (this.where) {
+            sql += ` WHERE ${this.where} `;
+        }
+        if (this.orderby) {
+            sql += ` ORDER BY ${this.orderby}`;
+        }
         if (typeof this.limit == "number")
             sql += ` LIMIT ${this.limit}`;
         if (typeof this.skip == "number")
@@ -76,11 +86,31 @@ class PGVisitor extends visitor_1.Visitor {
     }
     VisitHasExpression(node, context) {
         this.Visit(node.value.left, context);
-        this.where += " contains ";
+        this.where += " @> ARRAY[";
         this.Visit(node.value.right, context);
+        this.where += "]";
         if (context.literal == null) {
-            this.where = this.where.replace(new RegExp(`"${context.identifier}" contains \\$\\d+`), `"${context.identifier}" IS NULL`);
+            this.where = this.where.replace(new RegExp(`"${context.identifier}" @> \\$\\d+`), `"${context.identifier}" IS NULL`);
         }
+    }
+    VisitLambdaVariableExpression(node, context) { }
+    VisitLambdaPredicateExpression(node, context) {
+        var _a, _b, _c, _d, _e;
+        const enumValue = (_e = (_d = (_c = (_b = (_a = node.value) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.right) === null || _c === void 0 ? void 0 : _c.value) === null || _d === void 0 ? void 0 : _d.value) === null || _e === void 0 ? void 0 : _e.raw;
+        if (enumValue) {
+            this.parameters.push(enumValue);
+            const columnName = context.identifier.replace(".", "");
+            this.join = `LEFT JOIN "${columnName}Map" ON "${columnName}Map"."placeholderTableKey" = "placeholderTable"."ListingKey" WHERE "${columnName}Map"."Value"=$${this.parameters.length}`;
+        }
+    }
+    VisitAnyExpression(node, context) {
+        this.Visit(node.value.predicate, context);
+    }
+    VisitAllExpression(node, context) {
+        this.Visit(node.value.predicate, context);
+    }
+    VisitCollectionPathExpression(node, context) {
+        this.Visit(node.value, context);
     }
     VisitNotEqualsExpression(node, context) {
         this.Visit(node.value.left, context);
