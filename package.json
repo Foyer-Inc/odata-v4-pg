@@ -34,7 +34,7 @@
     "@types/pg": "^8.6.1",
     "chai": "^3.5.0",
     "config": "^3.3.6",
-    "mocha": "^3.1.2",
+    "mocha": "^10.2.0",
     "odata-v4-server": "rc",
     "pg": "^8.7.1",
     "typescript": "^4.4.2"
